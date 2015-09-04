@@ -15,10 +15,6 @@ public class ThreadPool {
     	checkIfProperThreadCapacity(threadCapacity);
     	threads = new Thread[threadCapacity];
         workerQueue = new LinkedList<>();
-        for (int i = 0; i < threadCapacity; i++) {
-            threads[i] = new Worker("Pool Thread " + i);
-            threads[i].start();
-        }
     }
 
     private void checkIfProperThreadCapacity(int threadCapacity) {
@@ -28,8 +24,18 @@ public class ThreadPool {
     }
 
     public synchronized void addTask(Runnable runnable) {
+    	if (threads[0] == null) {
+    		init();
+    	}
         workerQueue.add(runnable);
         notify();
+    }
+    
+    private void init() {
+        for (int i = 0; i < threads.length; i++) {
+            threads[i] = new Worker("Pool Thread " + i);
+            threads[i].start();
+        }
     }
 
     public void shutdown() {
